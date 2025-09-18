@@ -21,6 +21,10 @@ public final class KeychainHelper: KeychainHelperProtocol {
 
     public static let shared = KeychainHelper()
 
+    public convenience init() {
+        self.init(keychainTool: KeychainTool())
+    }
+
     let keychainTool: KeychainToolProtocol
     init(keychainTool: KeychainToolProtocol = KeychainTool()) {
         self.keychainTool = keychainTool
