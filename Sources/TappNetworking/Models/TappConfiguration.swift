@@ -26,9 +26,9 @@ public final class TappConfiguration: NSObject, Codable {
     internal let tappToken: String
     internal let affiliate: Affiliate
     internal let bundleID: String?
-    private(set) var originURL: URL?
-    private(set) var appToken: String?
-    private(set) var hasProcessedReferralEngine: Bool = false
+    private(set) public var originURL: URL?
+    private(set) public var appToken: String?
+    private(set) public var hasProcessedReferralEngine: Bool = false
 
     @objc
     public init(
