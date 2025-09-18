@@ -14,9 +14,9 @@ public final class NetworkClient: NetworkClientProtocol {
     let session: URLSessionProtocol
     let keychainHelper: KeychainHelperProtocol
 
-    init(sessionConfiguration: SessionConfigurationProtocol,
-         keychainHelper: KeychainHelperProtocol = KeychainHelper.shared,
-         session: URLSessionProtocol? = nil) {
+    public init(sessionConfiguration: SessionConfigurationProtocol,
+                keychainHelper: KeychainHelperProtocol = KeychainHelper.shared,
+                session: URLSessionProtocol? = nil) {
         self.sessionConfiguration = sessionConfiguration
         self.keychainHelper = keychainHelper
         self.session = session ?? URLSession(configuration: sessionConfiguration.configuration,

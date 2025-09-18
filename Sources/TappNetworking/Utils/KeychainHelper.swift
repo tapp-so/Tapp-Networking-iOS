@@ -8,18 +8,18 @@
 import Foundation
 import Security
 
-protocol KeychainHelperProtocol {
+public protocol KeychainHelperProtocol {
     func save(configuration: TappConfiguration)
     var config: TappConfiguration? { get }
     var hasConfig: Bool { get }
 }
 
-final class KeychainHelper: KeychainHelperProtocol {
+public final class KeychainHelper: KeychainHelperProtocol {
     enum StorageError: Error {
         case noValue
     }
 
-    static let shared = KeychainHelper()
+    public static let shared = KeychainHelper()
 
     let keychainTool: KeychainToolProtocol
     init(keychainTool: KeychainToolProtocol = KeychainTool()) {
@@ -30,7 +30,7 @@ final class KeychainHelper: KeychainHelperProtocol {
         return "tapp_c"
     }
 
-    func save(configuration: TappConfiguration) {
+    public func save(configuration: TappConfiguration) {
         if let config, let url = config.originURL {
             configuration.set(originURL: url)
         }
@@ -38,11 +38,11 @@ final class KeychainHelper: KeychainHelperProtocol {
         save(key: keychainKey, codable: configuration)
     }
 
-    var config: TappConfiguration? {
+    public var config: TappConfiguration? {
         return get(key: keychainKey, type: TappConfiguration.self) as? TappConfiguration
     }
 
-    var hasConfig: Bool {
+    public var hasConfig: Bool {
         return config != nil
     }
 
