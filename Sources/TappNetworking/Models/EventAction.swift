@@ -1,13 +1,13 @@
 import Foundation
 
-struct EventActionMapper {
-    let eventActionName: String
+public struct EventActionMapper {
+    public let eventActionName: String
 
-    init(eventActionName: String) {
+    public init(eventActionName: String) {
         self.eventActionName = eventActionName
     }
 
-    var eventAction: EventAction {
+    public var eventAction: EventAction {
         let dictionary = EventAction.allCases.nameDictionary
         if let eventAction = dictionary[eventActionName.lowercased()] {
             return eventAction
@@ -102,7 +102,7 @@ public enum EventAction: CaseIterable, Equatable {
     case completeTutorial
     case custom(String)
 
-    var isCustom: Bool {
+    public var isCustom: Bool {
         switch self {
         case .custom:
             return true
@@ -111,7 +111,7 @@ public enum EventAction: CaseIterable, Equatable {
         }
     }
 
-    var isValid: Bool {
+    public var isValid: Bool {
         switch self {
         case .custom(let value):
             return !value.isEmpty
@@ -120,7 +120,7 @@ public enum EventAction: CaseIterable, Equatable {
         }
     }
 
-    var name: String {
+    public var name: String {
         switch self {
         case .addPaymentInfo:
             return "tapp_add_payment_info"
