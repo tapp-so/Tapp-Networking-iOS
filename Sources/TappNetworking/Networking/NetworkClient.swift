@@ -52,15 +52,15 @@ public final class NetworkClient: NetworkClientProtocol {
 }
 
 extension Data {
-    var isError: Bool {
+    public var isError: Bool {
         return serverError != nil
     }
 
-    var serverError: ServerError? {
+    public var serverError: ServerError? {
         return try? JSONDecoder().decode(ServerError.self, from: self)
     }
 
-    func prettyPrinted() {
+    public func prettyPrinted() {
         if let json = try? JSONSerialization.jsonObject(with: self, options: .mutableContainers),
            let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
             print(String(decoding: jsonData, as: UTF8.self))
@@ -71,7 +71,7 @@ extension Data {
 }
 
 extension URLRequest {
-    func apply(token: String) -> URLRequest {
+    public func apply(token: String) -> URLRequest {
         var request = self
 
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -81,7 +81,7 @@ extension URLRequest {
 }
 
 extension URL {
-    func param(for key: String) -> String? {
+    public func param(for key: String) -> String? {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true) else { return nil }
         guard let queryItems = components.queryItems?.toDictionary else { return nil }
         return queryItems[key]?.value
@@ -89,7 +89,7 @@ extension URL {
 }
 
 extension Array where Element == URLQueryItem {
-    var toDictionary: [String: URLQueryItem] {
+    public var toDictionary: [String: URLQueryItem] {
         var dict: [String: URLQueryItem] = [:]
 
         forEach { item in
