@@ -62,15 +62,15 @@ public final class TappConfiguration: NSObject, Codable {
         super.init()
     }
 
-    func set(appToken: String) {
+    public func set(appToken: String) {
         self.appToken = appToken
     }
 
-    func set(originURL: URL) {
+    public func set(originURL: URL) {
         self.originURL = originURL
     }
 
-    func set(hasProcessedReferralEngine: Bool) {
+    public func set(hasProcessedReferralEngine: Bool) {
         self.hasProcessedReferralEngine = hasProcessedReferralEngine
     }
 }
