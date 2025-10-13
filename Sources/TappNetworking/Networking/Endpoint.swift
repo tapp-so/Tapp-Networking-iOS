@@ -56,7 +56,7 @@ public extension Environment {
     var baseURL: String {
         switch self {
         case .sandbox:
-            return "https://api.nkmhub.com/v1/ref"
+            return "https://api.staging.tapp.so/v1/ref"
         case .production:
             return "https://api.tapp.so/v1/ref"
         }
