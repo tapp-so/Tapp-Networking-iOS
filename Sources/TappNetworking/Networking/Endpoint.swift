@@ -1,44 +1,4 @@
-//
-//  Endpoint.swift
-//  Tapp
-//
-//  Created by Alex Stergiou on 19/11/2024.
-//
-
 import Foundation
-
-public enum APIPath: String {
-    case id
-    case influencer
-    case add
-    case deeplink
-    case secrets
-    case event
-    case linkData
-
-    public var prefixInfluencer: String {
-        return rawValue.prefixInfluencer
-    }
-
-    public var prefixAdd: String {
-        return rawValue.prefixAdd
-    }
-}
-
-extension String {
-
-    public var prefixInfluencer: String {
-        return prefix(APIPath.influencer.rawValue)
-    }
-
-    public var prefixAdd: String {
-        return prefix(APIPath.add.rawValue)
-    }
-
-    public func prefix(_ value: String) -> String {
-        return "\(value)/" + self
-    }
-}
 
 public enum HTTPMethod: String, CaseIterable {
     case options = "OPTIONS"
@@ -115,7 +75,7 @@ public extension Endpoint {
     func url(id: UUID) -> URL? {
         guard let url = defaultURL else { return nil }
         var components = URLComponents(string: url.absoluteString)
-        components?.queryItems = [URLQueryItem(name: APIPath.id.rawValue, value: id.uuidString)]
+        components?.queryItems = [URLQueryItem(name: "id", value: id.uuidString)]
         return components?.url
     }
 }

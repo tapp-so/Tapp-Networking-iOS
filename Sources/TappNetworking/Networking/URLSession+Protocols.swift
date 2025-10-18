@@ -1,7 +1,3 @@
-//
-//  URLSession+Protocols.swift
-//
-
 import Foundation
 
 public typealias VoidCompletion = (_ result: Result<Void, Error>) -> Void

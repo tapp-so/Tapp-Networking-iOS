@@ -1,7 +1,3 @@
-//
-//  SessionConfiguration.swift
-//
-
 import Foundation
 
 public typealias Percentage = Double

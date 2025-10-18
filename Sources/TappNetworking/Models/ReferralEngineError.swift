@@ -1,13 +1,3 @@
-//
-//  TappError.swift
-//  test_app
-//
-//  Created by Nikolaos Tseperkas on 28/9/24.
-//
-
-//  TappError.swift
-//  wanilla_referral_engine/Models
-
 import Foundation
 
 public enum TappError: Error {

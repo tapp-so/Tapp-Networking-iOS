@@ -1,7 +1,3 @@
-//
-//  NetworkClient.swift
-//
-
 import Foundation
 
 public protocol NetworkClientProtocol {

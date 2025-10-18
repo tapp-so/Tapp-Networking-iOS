@@ -1,7 +1,3 @@
-//
-//  Errors.swift
-//
-
 import Foundation
 
 public enum TappServiceError: Error {
