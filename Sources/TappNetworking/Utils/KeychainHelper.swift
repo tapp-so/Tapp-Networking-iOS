@@ -20,6 +20,7 @@ public final class KeychainHelper: KeychainHelperProtocol {
     }
 
     public static let shared = KeychainHelper()
+    private var bundleID: String?
 
     public convenience init() {
         self.init(keychainTool: KeychainTool())
@@ -30,8 +31,18 @@ public final class KeychainHelper: KeychainHelperProtocol {
         self.keychainTool = keychainTool
     }
 
+    @objc
+    public func set(bundleID: String?) {
+        guard self.bundleID == nil else { return }
+        self.bundleID = bundleID
+    }
+
     private var keychainKey: String {
-        return "tapp_c"
+        let key = "tapp_c"
+        if let bundleID {
+            return "\(key)_\(bundleID)"
+        }
+        return key
     }
 
     public func save(configuration: TappConfiguration) {
