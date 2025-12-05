@@ -10,6 +10,7 @@ import Security
 
 public protocol KeychainHelperProtocol {
     func save(configuration: TappConfiguration)
+    func set(bundleID: String?)
     var config: TappConfiguration? { get }
     var hasConfig: Bool { get }
 }
