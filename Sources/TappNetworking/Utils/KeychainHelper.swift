@@ -22,6 +22,7 @@ public final class KeychainHelper: KeychainHelperProtocol {
 
     public static let shared = KeychainHelper()
     private var bundleID: String?
+    private var environment: Environment = .sandbox
 
     public convenience init() {
         self.init(keychainTool: KeychainTool())
@@ -38,10 +39,15 @@ public final class KeychainHelper: KeychainHelperProtocol {
         self.bundleID = bundleID
     }
 
+    @objc
+    public func set(environment: Environment) {
+        self.environment = environment
+    }
+
     private var keychainKey: String {
         let key = "tapp_c"
         if let bundleID {
-            return "\(key)_\(bundleID)"
+            return "\(key)_\(bundleID)_\(environment.storageKey)"
         }
         return key
     }
@@ -115,5 +121,16 @@ final class KeychainTool: KeychainToolProtocol {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: key]
         SecItemDelete(query as CFDictionary)
+    }
+}
+
+private extension Environment {
+    var storageKey: String {
+        switch self {
+        case .sandbox:
+            return "s"
+        case .production:
+            return "p"
+        }
     }
 }
