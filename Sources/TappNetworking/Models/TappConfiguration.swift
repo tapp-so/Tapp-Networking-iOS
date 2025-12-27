@@ -18,7 +18,20 @@ public final class TappConfiguration: NSObject, Codable {
             }
         }
 
-        return equalNonOptionalValues && appTokensEqual
+        let lhsHasDeviceID = lhs.deviceID != nil
+        let rhsHasDeviceID = rhs.deviceID != nil
+        
+        var deviceIDsEqual: Bool = false
+        
+        if let lhsDeviceID = lhs.deviceID, let rhsDeviceID = rhs.deviceID {
+            deviceIDsEqual = lhsDeviceID == rhsDeviceID
+        } else {
+            if !lhsHasDeviceID, !rhsHasDeviceID {
+                deviceIDsEqual = true
+            }
+        }
+
+        return equalNonOptionalValues && appTokensEqual && deviceIDsEqual
     }
 
     public let authToken: String
@@ -26,6 +39,7 @@ public final class TappConfiguration: NSObject, Codable {
     public let tappToken: String
     public let affiliate: Affiliate
     public let bundleID: String?
+    private(set) public var deviceID: String?
     private(set) public var originURL: URL?
     private(set) public var appToken: String?
     private(set) public var hasProcessedReferralEngine: Bool = false
@@ -72,6 +86,10 @@ public final class TappConfiguration: NSObject, Codable {
 
     public func set(hasProcessedReferralEngine: Bool) {
         self.hasProcessedReferralEngine = hasProcessedReferralEngine
+    }
+
+    public func set(deviceID: String) {
+        self.deviceID = deviceID
     }
 }
 
