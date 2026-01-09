@@ -40,6 +40,8 @@ public final class TappConfiguration: NSObject, Codable {
     public let affiliate: Affiliate
     public let bundleID: String?
     private(set) public var deviceID: String?
+    private(set) public var isDeviceActive: Bool = false
+    private(set) public var isAlreadyVerified: Bool = false
     private(set) public var originURL: URL?
     private(set) public var appToken: String?
     private(set) public var hasProcessedReferralEngine: Bool = false
@@ -90,6 +92,16 @@ public final class TappConfiguration: NSObject, Codable {
 
     public func set(deviceID: String) {
         self.deviceID = deviceID
+    }
+
+    public func set(deviceActive: Bool) {
+        self.isDeviceActive = deviceActive
+    }
+
+    public func set(isAlreadyVerified: Bool) {
+        if self.isAlreadyVerified == false, isAlreadyVerified == true {
+            self.isAlreadyVerified = isAlreadyVerified
+        }
     }
 }
 
