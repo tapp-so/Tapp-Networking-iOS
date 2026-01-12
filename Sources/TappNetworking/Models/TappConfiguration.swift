@@ -42,9 +42,12 @@ public final class TappConfiguration: NSObject, Codable {
     private(set) public var deviceID: String?
     private(set) public var isDeviceActive: Bool = false
     private(set) public var isAlreadyVerified: Bool = false
-    private(set) public var originURL: URL?
     private(set) public var appToken: String?
     private(set) public var hasProcessedReferralEngine: Bool = false
+    private(set) public var originURL: URL?
+    private(set) public var originAttributedTappURL: URL?
+    private(set) public var originInfluencer: String?
+    private(set) public var originData: [String: String?]?
 
     @objc
     public init(
@@ -84,6 +87,18 @@ public final class TappConfiguration: NSObject, Codable {
 
     public func set(originURL: URL) {
         self.originURL = originURL
+    }
+
+    public func set(originAttributedTappURL: URL?) {
+        self.originAttributedTappURL = originAttributedTappURL
+    }
+
+    public func set(originInfluencer: String?) {
+        self.originInfluencer = originInfluencer
+    }
+
+    public func set(originData: [String: String?]?) {
+        self.originData = originData
     }
 
     public func set(hasProcessedReferralEngine: Bool) {
