@@ -114,7 +114,12 @@ public final class TappConfiguration: NSObject, Codable {
     }
 
     public func set(isAlreadyVerified: Bool) {
-        if self.isAlreadyVerified == false, isAlreadyVerified == true {
+        switch env {
+        case .production:
+            if self.isAlreadyVerified == false, isAlreadyVerified == true {
+                self.isAlreadyVerified = isAlreadyVerified
+            }
+        case .sandbox:
             self.isAlreadyVerified = isAlreadyVerified
         }
     }
