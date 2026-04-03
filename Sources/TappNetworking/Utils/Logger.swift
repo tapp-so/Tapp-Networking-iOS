@@ -1,16 +1,19 @@
-//
-//  Logger.swift
-//  Tapp
-//
-//  Created by Nikolaos Tseperkas on 11/11/24.
-//
-
 final class Logger {
-    public static func logError(_ error: Error) {
+    public static func logError(_ error: Error, environment: Environment, context: String? = nil) {
+        guard environment == .sandbox else { return }
+        print("Tapp ------------------")
+        if let context {
+            print("Context: \(context)")
+        }
         print("Error: \(error.localizedDescription)")
     }
 
-    public static func logInfo(_ message: String) {
+    public static func logInfo(message: String, environment: Environment, context: String? = nil) {
+        guard environment == .sandbox else { return }
+        print("Tapp ------------------")
+        if let context {
+            print("Context: \(context)")
+        }
         print("Info: \(message)")
     }
 }
