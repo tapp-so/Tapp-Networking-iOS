@@ -11,6 +11,7 @@ import Security
 public protocol KeychainHelperProtocol {
     func save(configuration: TappConfiguration)
     func set(bundleID: String?)
+    var currentEnvironment: Environment { get }
     func set(environment: Environment)
     var config: TappConfiguration? { get }
     var hasConfig: Bool { get }
@@ -23,7 +24,7 @@ public final class KeychainHelper: KeychainHelperProtocol {
 
     public static let shared = KeychainHelper()
     private var bundleID: String?
-    private(set) var environment: Environment = .sandbox
+    private var environment: Environment = .sandbox
 
     public convenience init() {
         self.init(keychainTool: KeychainTool())
@@ -32,6 +33,10 @@ public final class KeychainHelper: KeychainHelperProtocol {
     let keychainTool: KeychainToolProtocol
     init(keychainTool: KeychainToolProtocol = KeychainTool()) {
         self.keychainTool = keychainTool
+    }
+
+    public var currentEnvironment: Environment {
+        return environment
     }
 
     @objc
