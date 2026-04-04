@@ -44,20 +44,22 @@ public final class KeychainHelper: KeychainHelperProtocol {
         guard self.bundleID == nil else { return }
         self.bundleID = bundleID
         if let bid = bundleID {
-            Logger.logInfo(message: "Bundle ID set to \(bid)",
-                           environment: environment,
-                           context: "Configration")
+            TappLog.logInfo(message: "Bundle ID set to \(bid)",
+                            environment: environment,
+                            context: "Configration")
         } else {
-            Logger.logInfo(message: "Bundle ID set to nil",
-                           environment: environment,
-                           context: "Configration")
+            TappLog.logInfo(message: "Bundle ID set to nil",
+                            environment: environment,
+                            context: "Configration")
         }
     }
 
     @objc
     public func set(environment: Environment) {
         self.environment = environment
-        Logger.logInfo(message: "Environment set to \(environment.rawValue)", environment: environment, context: "Configration")
+        TappLog.logInfo(message: "Environment set to \(environment.rawValue)",
+                        environment: environment,
+                        context: "Configration")
     }
 
     private var keychainKey: String {
@@ -74,7 +76,9 @@ public final class KeychainHelper: KeychainHelperProtocol {
         }
 
         save(key: keychainKey, codable: configuration)
-        Logger.logInfo(message: "Configuration set", environment: environment, context: "Configration")
+        TappLog.logInfo(message: "Configuration set",
+                        environment: environment,
+                        context: "Configration")
     }
 
     public var config: TappConfiguration? {

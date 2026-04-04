@@ -1,4 +1,4 @@
-final class Logger {
+public final class TappLog {
     public static func logError(_ error: Error, environment: Environment, context: String? = nil) {
         guard environment == .sandbox else { return }
         print("Tapp ------------------")
