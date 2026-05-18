@@ -109,20 +109,12 @@ protocol KeychainToolProtocol {
 }
 
 final class KeychainTool: KeychainToolProtocol {
-    private var accessGroup: String {
-        return Bundle.main.bundleIdentifier ?? .empty
-    }
-    
     func save(key: String, codable: any Codable) {
         let encoder: JSONEncoder = JSONEncoder()
         guard let data = try? encoder.encode(codable) else { return }
-        
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecValueData as String: data,
-            kSecAttrAccessGroup as String: accessGroup
-        ]
+        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                    kSecAttrAccount as String: key,
+                                    kSecValueData as String: data]
 
         SecItemDelete(query as CFDictionary) // Remove existing item
         SecItemAdd(query as CFDictionary, nil)
@@ -133,8 +125,7 @@ final class KeychainTool: KeychainToolProtocol {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-            kSecAttrAccessGroup as String: accessGroup
+            kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
         var result: AnyObject?
@@ -148,12 +139,8 @@ final class KeychainTool: KeychainToolProtocol {
     }
 
     func delete(key: String) {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecAttrAccessGroup as String: accessGroup
-        ]
-        
+        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                    kSecAttrAccount as String: key]
         SecItemDelete(query as CFDictionary)
     }
 }
