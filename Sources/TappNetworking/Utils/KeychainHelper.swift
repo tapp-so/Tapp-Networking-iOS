@@ -114,7 +114,8 @@ final class KeychainTool: KeychainToolProtocol {
         guard let data = try? encoder.encode(codable) else { return }
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: key,
-                                    kSecValueData as String: data]
+                                    kSecValueData as String: data,
+                                    kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock]
 
         SecItemDelete(query as CFDictionary) // Remove existing item
         SecItemAdd(query as CFDictionary, nil)
