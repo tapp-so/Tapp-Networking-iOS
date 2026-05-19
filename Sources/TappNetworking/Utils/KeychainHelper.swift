@@ -41,25 +41,24 @@ public final class KeychainHelper: KeychainHelperProtocol {
 
     @objc
     public func set(bundleID: String?) {
-        guard self.bundleID == nil else { return }
-        self.bundleID = bundleID
-        if let bid = bundleID {
-            TappLog.logInfo(message: "Bundle ID set to \(bid)",
+        guard self.bundleID == nil else {
+            TappLog.logInfo(message: "⚠️ Keychain: bundleID already set to '\(self.bundleID ?? "nil")', ignoring new value '\(bundleID ?? "nil")'",
                             environment: environment,
-                            context: "Configration")
-        } else {
-            TappLog.logInfo(message: "Bundle ID set to nil",
-                            environment: environment,
-                            context: "Configration")
+                            context: "Keychain")
+            return
         }
+        self.bundleID = bundleID
+        TappLog.logInfo(message: "✅ Keychain: bundleID set to '\(bundleID ?? "nil")'",
+                        environment: environment,
+                        context: "Keychain")
     }
 
     @objc
     public func set(environment: Environment) {
         self.environment = environment
-        TappLog.logInfo(message: "Environment set to \(environment.rawValue)",
+        TappLog.logInfo(message: "✅ Keychain: environment set to '\(environment.rawValue)'",
                         environment: environment,
-                        context: "Configration")
+                        context: "Keychain")
     }
 
     private var keychainKey: String {
@@ -76,13 +75,12 @@ public final class KeychainHelper: KeychainHelperProtocol {
         }
 
         save(key: keychainKey, codable: configuration)
-        TappLog.logInfo(message: "Configuration set",
-                        environment: environment,
-                        context: "Configration")
     }
 
     public var config: TappConfiguration? {
-        return get(key: keychainKey, type: TappConfiguration.self) as? TappConfiguration
+        let result = get(key: keychainKey, type: TappConfiguration.self) as? TappConfiguration
+
+        return result
     }
 
     public var hasConfig: Bool {
@@ -109,40 +107,82 @@ protocol KeychainToolProtocol {
 }
 
 final class KeychainTool: KeychainToolProtocol {
-    func save(key: String, codable: any Codable) {
-        let encoder: JSONEncoder = JSONEncoder()
-        guard let data = try? encoder.encode(codable) else { return }
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                    kSecAttrAccount as String: key,
-                                    kSecValueData as String: data,
-                                    kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock]
 
-        SecItemDelete(query as CFDictionary) // Remove existing item
+    private let service = "com.tapp.sdk"
+
+    func save(key: String, codable: any Codable) {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(codable) else {
+            return
+        }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]
+
+        SecItemDelete(query as CFDictionary)
         SecItemAdd(query as CFDictionary, nil)
     }
 
     func get<T: Decodable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy) -> Decodable? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
         var result: AnyObject?
-        SecItemCopyMatching(query as CFDictionary, &result)
-        guard let data = result as? Data else { return nil }
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
 
-        let decoder: JSONDecoder = JSONDecoder()
+        guard status == errSecSuccess else {
+            return nil
+        }
+
+        guard let data = result as? Data else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = decodingStrategy
 
-        return try? decoder.decode(type, from: data) as T
+        do {
+            let decoded = try decoder.decode(type, from: data)
+            return decoded
+        } catch {
+            return nil
+        }
     }
 
     func delete(key: String) {
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                    kSecAttrAccount as String: key]
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key
+        ]
+
         SecItemDelete(query as CFDictionary)
+    }
+
+    private func statusDescription(_ status: OSStatus) -> String {
+        switch status {
+        case errSecSuccess:             return "(success)"
+        case errSecItemNotFound:        return "(item not found)"
+        case errSecDuplicateItem:       return "(duplicate item)"
+        case errSecParam:               return "(bad parameter)"
+        case errSecAllocate:            return "(allocation failure)"
+        case errSecNotAvailable:        return "(not available)"
+        case errSecAuthFailed:          return "(auth failed)"
+        case -34018:                    return "(missing entitlement — check keychain-access-groups)"
+        case -25243:                    return "(no access for item — check kSecAttrAccessible)"
+        case -25308:                    return "(interaction not allowed — device may be locked)"
+        default:                        return "(unknown — look up OSStatus \(status))"
+        }
     }
 }
 
