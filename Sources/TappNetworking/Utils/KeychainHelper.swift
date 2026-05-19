@@ -15,6 +15,7 @@ public protocol KeychainHelperProtocol {
     func set(environment: Environment)
     var config: TappConfiguration? { get }
     var hasConfig: Bool { get }
+    func clearKeychainData()
 }
 
 public final class KeychainHelper: KeychainHelperProtocol {
@@ -61,12 +62,16 @@ public final class KeychainHelper: KeychainHelperProtocol {
                         context: "Keychain")
     }
 
-    private var keychainKey: String {
+    public var keychainKey: String {
         let key = "tapp_c"
         if let bundleID {
             return "\(key)_\(bundleID)_\(environment.storageKey)"
         }
         return key
+    }
+
+    public var serviceKey: String {
+        return keychainTool.service
     }
 
     public func save(configuration: TappConfiguration) {
@@ -91,30 +96,38 @@ public final class KeychainHelper: KeychainHelperProtocol {
         keychainTool.save(key: key, codable: codable)
     }
 
-    private func get<T: Decodable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy = .iso8601) -> (any Decodable)? {
+    private func get<T: Codable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy = .iso8601) -> (any Decodable)? {
         return keychainTool.get(key: key, type: type, decodingStrategy: decodingStrategy)
     }
 
     func delete(key: String) {
         return keychainTool.delete(key: key)
     }
+
+    public func clearKeychainData() {
+        guard currentEnvironment == .sandbox else { return }
+        guard bundleID != nil else { return }
+        keychainTool.delete(key: keychainKey)
+    }
 }
 
 protocol KeychainToolProtocol {
     func save(key: String, codable: any Codable)
-    func get<T: Decodable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy) -> Decodable?
+    func get<T: Codable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy) -> Decodable?
     func delete(key: String)
+    var service: String { get }
 }
 
 final class KeychainTool: KeychainToolProtocol {
 
-    private let service = "com.tapp.sdk"
+    let service: String
+    init(service: String = "com.tapp.sdk") {
+        self.service = service
+    }
 
     func save(key: String, codable: any Codable) {
         let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(codable) else {
-            return
-        }
+        guard let data = try? encoder.encode(codable) else { return }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -128,8 +141,9 @@ final class KeychainTool: KeychainToolProtocol {
         SecItemAdd(query as CFDictionary, nil)
     }
 
-    func get<T: Decodable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy) -> Decodable? {
-        let query: [String: Any] = [
+    func get<T: Codable>(key: String, type: T.Type, decodingStrategy: JSONDecoder.DateDecodingStrategy) -> Decodable? {
+
+        let newQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
@@ -138,25 +152,30 @@ final class KeychainTool: KeychainToolProtocol {
         ]
 
         var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-
-        guard status == errSecSuccess else {
-            return nil
-        }
-
-        guard let data = result as? Data else {
-            return nil
-        }
-
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = decodingStrategy
-
-        do {
-            let decoded = try decoder.decode(type, from: data)
+        if SecItemCopyMatching(newQuery as CFDictionary, &result) == errSecSuccess,
+           let data = result as? Data,
+           let decoded = try? JSONDecoder().decode(type, from: data) {
             return decoded
-        } catch {
-            return nil
         }
+
+        // 2. Fall back to old query (without service) for migration
+        let oldQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        result = nil
+        if SecItemCopyMatching(oldQuery as CFDictionary, &result) == errSecSuccess,
+           let data = result as? Data,
+           let decoded = try? JSONDecoder().decode(type, from: data) {
+            // 3. Migrate — re-save under new key so future reads use the new format
+            save(key: key, codable: decoded)
+            return decoded
+        }
+
+        return nil
     }
 
     func delete(key: String) {
@@ -165,24 +184,7 @@ final class KeychainTool: KeychainToolProtocol {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key
         ]
-
         SecItemDelete(query as CFDictionary)
-    }
-
-    private func statusDescription(_ status: OSStatus) -> String {
-        switch status {
-        case errSecSuccess:             return "(success)"
-        case errSecItemNotFound:        return "(item not found)"
-        case errSecDuplicateItem:       return "(duplicate item)"
-        case errSecParam:               return "(bad parameter)"
-        case errSecAllocate:            return "(allocation failure)"
-        case errSecNotAvailable:        return "(not available)"
-        case errSecAuthFailed:          return "(auth failed)"
-        case -34018:                    return "(missing entitlement — check keychain-access-groups)"
-        case -25243:                    return "(no access for item — check kSecAttrAccessible)"
-        case -25308:                    return "(interaction not allowed — device may be locked)"
-        default:                        return "(unknown — look up OSStatus \(status))"
-        }
     }
 }
 
