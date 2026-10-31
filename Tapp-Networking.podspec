@@ -1,16 +1,16 @@
 Pod::Spec.new do |spec|
   spec.name          = 'Tapp-Networking'
-  spec.version       = '1.1.6'
+  spec.version       = '1.1.7'
   spec.license       = { :type => 'BSD' }
   spec.homepage      = 'https://github.com/tapp-so/Tapp-Networking-iOS'
   spec.authors       = { 'Alex Stergiou' => 'alex@tapp.so' }
   spec.summary       = 'TappSDK.'
-  spec.source        = { :git => 'https://github.com/tapp-so/Tapp-Networking-iOS.git', :tag => '1.1.6' }
+  spec.source        = { :git => 'https://github.com/tapp-so/Tapp-Networking-iOS.git', :tag => '1.1.7' }
   spec.module_name   = 'TappNetworking'
   spec.swift_version = '5.7'
   spec.license       = { :type => 'MIT', :file => 'LICENSE.md' }
 
-  spec.ios.deployment_target  = '13.0'
+  spec.ios.deployment_target  = '15.0'
 
   spec.source_files       = 'Sources/**/*.swift'
   spec.ios.source_files   = 'Sources/**/*.swift'
